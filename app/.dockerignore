@@ -1,0 +1,13 @@
+node_modules
+.pnpm
+.pnpm-store
+.git
+.svelte-kit
+dist
+*.log
+.vscode
+.idea
+coverage
+tests
+project.code-workspace
+README.md

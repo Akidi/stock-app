@@ -1,0 +1,91 @@
+services:
+  stock-app:
+    image: stock-app:prod
+    container_name: stock-app.prod
+    build:
+      context: ./app
+    ports:
+      - 80:3000
+    env_file:
+      - .env.prod
+    working_dir: /app
+    command: sh -c "node build/index.js"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    depends_on:
+      stock-app.db.prod:
+        condition: service_healthy
+      stock-app.redis.prod:
+        condition: service_healthy
+    networks:
+      - stock-app.network
+      - stock-app.internal
+    
+
+  stock-app.db.prod:
+    image: postgres:17
+    container_name: stock-app.db.prod 
+    env_file:
+      - .env.prod
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.prod.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - stock-app.internal
+  
+  stock-app.migrate:
+    image: stock-app-migrate:prod
+    container_name: stock-app.migrate
+    build:
+      context: ./app
+      dockerfile: Dockerfile.migrate
+    env_file:
+      - .env.prod
+    depends_on:
+      stock-app.db.prod:
+        condition: service_healthy
+    networks:
+      - stock-app.internal
+  
+  stock-app.redis.prod:
+    image: redis/redis-stack:latest
+    container_name: stock-app.redis.prod
+    ports:
+      - 8001:8001
+    volumes:
+      - redis_data:/data
+    networks:
+      - stock-app.internal
+      - stock-app.network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  stock-app.network:
+    name: stock-app.network
+    driver: bridge
+  stock-app.internal:
+    name: stock-app.internal
+    driver: bridge
+    internal: true
+
+volumes:
+  db_data:
+    driver: local
+    name: stock-app.db.prod
+  redis_data:
+    driver: local
+    name: stock-app.redis.prod

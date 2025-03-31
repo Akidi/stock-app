@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1742826909417,
+      "tag": "0000_reflective_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1743278084256,
+      "tag": "0001_ambitious_leper_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1743321541255,
+      "tag": "0002_solid_daimon_hellstrom",
+      "breakpoints": true
+    }
+  ]
+}
